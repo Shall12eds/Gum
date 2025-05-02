@@ -55,7 +55,7 @@ rarity = {
 
 raritys = {}
 __version__ = "1.8.4" 
-upd = "Only discovered raritys are displayed on use stats and rarity\nTime display on auto-rolls"
+upd = "Github no way"
 Gamestarts = [0]
 raritys = {cat: [0] for cat in rarity}
 Rolls = [0]
