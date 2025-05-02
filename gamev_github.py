@@ -54,7 +54,7 @@ rarity = {
 }
 
 raritys = {}
-__version__ = "1.8.3" 
+__version__ = "1.8.4" 
 upd = "Only discovered raritys are displayed on use stats and rarity\nTime display on auto-rolls"
 Gamestarts = [0]
 raritys = {cat: [0] for cat in rarity}
@@ -88,27 +88,52 @@ auto_bet_threshold = 0
 
 
 def check_for_updates():
-    GITHUB_RAW_URL = "https://raw.githubusercontent.com/Shall12eds/Gum/refs/heads/main/gamev1.8.3%20github.py?token=GHSAT0AAAAAADDHE7U7VSRYXDHXCCXJTUJE2AVH7CA"
+    GITHUB_RAW_URL = "https://raw.githubusercontent.com/Shall12eds/Gum/main/gamev1.8.3%20github.py"
     
     try:
+        print("\nChecking for updates...")
+        
         response = requests.get(GITHUB_RAW_URL)
+        response.raise_for_status()
         latest_code = response.text
         
         with open(__file__, 'r', encoding='utf-8') as f:
             local_code = f.read()
             
-        if latest_code != local_code:
-            print("Atualização encontrada! Aplicando...")
-            with open(__file__, 'w', encoding='utf-8') as f:
-                f.write(latest_code)
-            print("Reiniciando...")
-            os.execv(sys.executable, [sys.executable] + sys.argv)
+        if latest_code == local_code:
+            print("You already have the latest version!")
+            return False
             
+        print("\nNew update available!")
+        print("Would you like to update now? (Y/N)")
+        
+        while True:
+            choice = input("> ").strip().lower()
+            if choice in ['y', 'yes']:
+                backup_file = __file__ + ".bak"
+                with open(backup_file, 'w', encoding='utf-8') as f:
+                    f.write(local_code)
+                print(f"Backup created: {backup_file}")
+                
+                with open(__file__, 'w', encoding='utf-8') as f:
+                    f.write(latest_code)
+                
+                print("Update successful! Restarting...")
+                os.execv(sys.executable, [sys.executable] + sys.argv)
+                return True
+                
+            elif choice in ['n', 'no']:
+                print("Update cancelled by user.")
+                return False
+            else:
+                print("Please answer with Y (Yes) or N (No):")
+                
+    except requests.exceptions.RequestException as e:
+        print(f"Connection error: {str(e)}")
     except Exception as e:
-        print(f"Erro ao verificar atualizações: {e}")
-
-if __file__ == "__main__":
-    check_for_updates()
+        print(f"Update failed: {str(e)}")
+        print("Please download the update manually from GitHub")
+    return False
 
 def xor_encrypt_decrypt(data, key):
     return ''.join(chr(ord(char) ^ key) for char in data)
