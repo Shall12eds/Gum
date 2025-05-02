@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 import platform
 import re
 import select
+import requests
+
 
 if platform.system().lower() == 'windows':
     os.system('color')
@@ -52,7 +54,7 @@ rarity = {
 }
 
 raritys = {}
-
+__version__ = "1.8.3" 
 upd = "Only discovered raritys are displayed on use stats and rarity\nTime display on auto-rolls"
 Gamestarts = [0]
 raritys = {cat: [0] for cat in rarity}
@@ -83,6 +85,30 @@ login_streak = [0]
 last_login_date = [None]
 auto_bet_threshold = 0
 
+
+
+def check_for_updates():
+    GITHUB_RAW_URL = "https://raw.githubusercontent.com/Shall12eds/Gum/refs/heads/main/gamev1.8.3%20github.py?token=GHSAT0AAAAAADDHE7U7VSRYXDHXCCXJTUJE2AVH7CA"
+    
+    try:
+        response = requests.get(GITHUB_RAW_URL)
+        latest_code = response.text
+        
+        with open(__file__, 'r', encoding='utf-8') as f:
+            local_code = f.read()
+            
+        if latest_code != local_code:
+            print("Atualização encontrada! Aplicando...")
+            with open(__file__, 'w', encoding='utf-8') as f:
+                f.write(latest_code)
+            print("Reiniciando...")
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+            
+    except Exception as e:
+        print(f"Erro ao verificar atualizações: {e}")
+
+if __file__ == "__main__":
+    check_for_updates()
 
 def xor_encrypt_decrypt(data, key):
     return ''.join(chr(ord(char) ^ key) for char in data)
@@ -897,6 +923,60 @@ def auto_save(filename="player_stats.sav"):
         save_file_path = os.path.abspath(filename)
     
 
+
+
+def check_for_updates():
+    GITHUB_RAW_URL = "https://raw.githubusercontent.com/Shall12eds/Gum/refs/heads/main/gamev1.8.3%20github.py?token=GHSAT0AAAAAADDHE7U7VSRYXDHXCCXJTUJE2AVH7CA"
+    
+    try:
+        print("\Checking for updates...")
+        
+        response = requests.get(GITHUB_RAW_URL)
+        response.raise_for_status()
+        latest_code = response.text
+        
+        with open(__file__, 'r', encoding='utf-8') as f:
+            local_code = f.read()
+            
+        if latest_code == local_code:
+            print("You already have the latest version!")
+            return False
+            
+        print("NEW UPDATE AVAILABLE!")
+        print("Would you like to update now? (Y/N)")
+        
+        while True:
+            choice = input("> ").strip().lower()
+            if choice in ['y', 'yes']:
+                print("Downloading update...")
+                backup_path = f"{__file__}.bak"
+                with open(backup_path, 'w', encoding='utf-8') as f:
+                    f.write(local_code)
+                
+                with open(__file__, 'w', encoding='utf-8') as f:
+                    f.write(latest_code)
+                
+                print("Update complete! Restarting...")
+                os.execv(sys.executable, [sys.executable] + sys.argv)
+                return True
+                
+            elif choice in ['n', 'no']:
+                print("Update cancelled by user.")
+                return False
+            else:
+                print("Please answer with Y (Yes) or N (No):")
+                
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to check for updates: {str(e)}")
+        return False
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        return False
+
+
+# elif RNG.lower() == "update":
+#     check_for_updates()
+
 print(r"""
 
  __                       __                _             
@@ -1105,7 +1185,8 @@ while True:
         if debug == True:
             multiroll = True
             db = int(input("Enter roll per enter:\n"))
-            
+    elif RNG.lower() == "update":
+        check_for_updates()
     elif RNG.lower() == "disablemultiroll":
         if multiroll:
             multiroll = False
